@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import type { PipelineMetrics, PercentileMetrics } from '../types/index.ts';
+import type { PipelineMetrics, PercentileMetrics } from '../types/index';
 
 interface LatencyPanelProps {
   metrics: PipelineMetrics | null;

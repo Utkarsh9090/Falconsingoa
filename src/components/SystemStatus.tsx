@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import type { SystemStatusData, ServiceHealth } from '../types/index.ts';
+import type { SystemStatusData, ServiceHealth } from '../types/index';
 
 interface SystemStatusProps {
   status: SystemStatusData | null;

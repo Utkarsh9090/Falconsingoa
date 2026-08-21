@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { FalconsLogo, GoaHindiLogo, HackerHouseLogo } from './BrandLogos.tsx';
+import { FalconsLogo, GoaHindiLogo, HackerHouseLogo } from './BrandLogos';
 
 export function Footer() {
   return (

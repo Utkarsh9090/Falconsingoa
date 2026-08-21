@@ -1,17 +1,20 @@
+'use client';
+
 import { useCallback } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { AppState } from './types/index.ts';
-import { useAppState } from './hooks/useAppState.ts';
-import { useAudioVisualizer } from './hooks/useAudioVisualizer.ts';
-import { Navbar } from './components/Navbar.tsx';
-import { Hero } from './components/Hero.tsx';
-import { AnswerView } from './components/AnswerView.tsx';
-import { SourceContext } from './components/SourceContext.tsx';
-import { LatencyPanel } from './components/LatencyPanel.tsx';
-import { ErrorState } from './components/ErrorState.tsx';
-import { ArchitectureSection } from './components/ArchitectureSection.tsx';
-import { SystemStatus } from './components/SystemStatus.tsx';
-import { Footer } from './components/Footer.tsx';
+import { AppState } from './types/index';
+
+import { useAppState } from './hooks/useAppState';
+import { useAudioVisualizer } from './hooks/useAudioVisualizer';
+import { Navbar } from './components/Navbar';
+import { Hero } from './components/Hero';
+import { AnswerView } from './components/AnswerView';
+import { SourceContext } from './components/SourceContext';
+import { LatencyPanel } from './components/LatencyPanel';
+import { ErrorState } from './components/ErrorState';
+import { ArchitectureSection } from './components/ArchitectureSection';
+import { SystemStatus } from './components/SystemStatus';
+import { Footer } from './components/Footer';
 
 export default function App() {
   const app = useAppState();

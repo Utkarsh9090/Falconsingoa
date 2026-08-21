@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { AppState } from '../types/index.ts';
+import { AppState } from '../types/index';
 
 interface TranscriptProps {
   state: AppState;

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
-import { AppState, PipelineStage } from '../types/index.ts';
-import type { StageStatus } from '../types/index.ts';
+import { AppState, PipelineStage } from '../types/index';
+import type { StageStatus } from '../types/index';
 
 interface ProcessingPipelineProps {
   state: AppState;

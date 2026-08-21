@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import type { AppError } from '../types/index.ts';
-import { AppState } from '../types/index.ts';
+import type { AppError } from '../types/index';
+import { AppState } from '../types/index';
 
 interface ErrorStateProps {
   state: AppState;

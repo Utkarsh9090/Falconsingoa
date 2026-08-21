@@ -1,10 +1,10 @@
 import { motion } from 'framer-motion';
-import { VoiceInterface } from './VoiceInterface.tsx';
-import { Transcript } from './Transcript.tsx';
-import { ProcessingPipeline } from './ProcessingPipeline.tsx';
-import { GoaHindiLogo, HackerHouseLogo, FalconsLogo } from './BrandLogos.tsx';
-import { AppState } from '../types/index.ts';
-import type { AudioVisualizerHook } from '../hooks/useAudioVisualizer.ts';
+import { VoiceInterface } from './VoiceInterface';
+import { Transcript } from './Transcript';
+import { ProcessingPipeline } from './ProcessingPipeline';
+import { GoaHindiLogo, HackerHouseLogo, FalconsLogo } from './BrandLogos';
+import { AppState } from '../types/index';
+import type { AudioVisualizerHook } from '../hooks/useAudioVisualizer';
 
 interface HeroProps {
   state: AppState;

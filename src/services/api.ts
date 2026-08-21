@@ -9,7 +9,7 @@ import type {
   RAGResponse,
   SystemStatusData,
   PipelineMetrics,
-} from '../types/index.ts';
+} from '../types/index';
 
 export interface APIService {
   /** Transcribe audio blob to text via STT */
@@ -26,7 +26,6 @@ export interface APIService {
 }
 
 // -----------------------------------------------------------------
-// Export the mock implementation as the default for now.
-// When the backend is ready, swap this single import.
+// Export the real implementation.
 // -----------------------------------------------------------------
-export { mockAPI as api } from './mockApi.ts';
+export { realAPI as api } from './realApi';

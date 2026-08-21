@@ -17,8 +17,8 @@ import {
   type AppError,
   type Source,
   type GroundingStatus,
-} from '../types/index.ts';
-import { api } from '../services/api.ts';
+} from '../types/index';
+import { api } from '../services/api';
 
 export interface AppStateHook {
   /* Core state */
@@ -134,12 +134,7 @@ export function useAppState(): AppStateHook {
         await new Promise((r) => setTimeout(r, 300));
         if (abortRef.current) return;
 
-        // Add STT time to metrics
-        const sttTime = Math.round((Date.now() - startTime) * 0.3);
-        response.metrics.stt = sttTime;
-        if (response.metrics.total !== null) {
-          response.metrics.total += sttTime;
-        }
+        // Remove fake delay logic - backend sets real STT times
 
         processResponse(response);
       } catch {

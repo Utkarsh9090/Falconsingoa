@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { GoaHindiLogo } from './BrandLogos.tsx';
+import { GoaHindiLogo } from './BrandLogos';
 
 const PIPELINE_STEPS = [
   { label: 'VOICE', description: 'User speaks a question' },

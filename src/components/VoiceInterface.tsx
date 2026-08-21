@@ -1,8 +1,8 @@
 import { useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { AppState } from '../types/index.ts';
-import { AudioVisualizer } from './AudioVisualizer.tsx';
-import type { AudioVisualizerHook } from '../hooks/useAudioVisualizer.ts';
+import { AppState } from '../types/index';
+import { AudioVisualizer } from './AudioVisualizer';
+import type { AudioVisualizerHook } from '../hooks/useAudioVisualizer';
 
 interface VoiceInterfaceProps {
   state: AppState;

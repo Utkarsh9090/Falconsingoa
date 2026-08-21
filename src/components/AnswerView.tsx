@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import type { PipelineMetrics, GroundingStatus } from '../types/index.ts';
+import type { PipelineMetrics, GroundingStatus } from '../types/index';
 
 interface AnswerViewProps {
   answer: string;

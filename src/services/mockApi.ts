@@ -11,8 +11,8 @@ import type {
   PipelineMetrics,
   Source,
   GuardrailResult,
-} from '../types/index.ts';
-import type { APIService } from './api.ts';
+} from '../types/index';
+import type { APIService } from './api';
 
 /* ===================================================================
    HELPERS
