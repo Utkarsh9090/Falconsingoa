@@ -1,8 +1,0 @@
-{
-  "/_not-found/page": "/_not-found",
-  "/api/transcribe/route": "/api/transcribe",
-  "/api/status/route": "/api/status",
-  "/api/query/route": "/api/query",
-  "/api/metrics/route": "/api/metrics",
-  "/page": "/"
-}
