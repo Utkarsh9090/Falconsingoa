@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { AppState } from './types/index';
 
@@ -9,7 +9,6 @@ import { useAudioVisualizer } from './hooks/useAudioVisualizer';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { AnswerView } from './components/AnswerView';
-import { SourceContext } from './components/SourceContext';
 import { LatencyPanel } from './components/LatencyPanel';
 import { ErrorState } from './components/ErrorState';
 import { ArchitectureSection } from './components/ArchitectureSection';
@@ -20,20 +19,42 @@ export default function App() {
   const app = useAppState();
   const audio = useAudioVisualizer();
 
+  /** Live interim text from native STT — lifted to App so Hero + ConversationPanels share it */
+  const [interim, setInterim] = useState('');
+
   const handleError = useCallback(
     (_type: 'mic_permission', message: string) => {
-      // We need to set error state — use the reset then manually set error
-      // The stopListening path won't be called since startCapture failed
       app.reset();
-      // Trigger error after reset
-      setTimeout(() => {
-        app.submitQuery(''); // This is a no-op that won't actually fire
-      }, 0);
-      // Instead, we handle it by showing mic error inline
       console.error('Mic error:', message);
     },
     [app]
   );
+
+  const handleFinalTranscript = useCallback(
+    (text: string) => {
+      setInterim('');
+      app.submitQuery(text);
+    },
+    [app]
+  );
+
+  const handleInterimTranscript = useCallback((text: string) => {
+    setInterim(text);
+    app.setTranscript(text);
+  }, [app]);
+
+  const handleStopListening = useCallback(
+    (blob: Blob) => {
+      setInterim('');
+      app.stopListening(blob);
+    },
+    [app]
+  );
+
+  const handleStartListening = useCallback(() => {
+    setInterim('');
+    app.startListening();
+  }, [app]);
 
   const isAnswerOrGuardrail =
     app.state === AppState.ANSWER ||
@@ -43,34 +64,42 @@ export default function App() {
     app.state === AppState.ERROR;
 
   const showAnswer = app.state === AppState.ANSWER;
+  const hasConversation = app.turns.length > 0;
 
   return (
     <div className="relative min-h-screen bg-bg-primary">
       <Navbar />
 
-      {/* Hero / Primary interaction */}
+      {/* Hero / Primary interaction — now embeds ConversationPanels */}
       <Hero
         state={app.state}
         transcript={app.transcript}
         audio={audio}
-        onStartListening={app.startListening}
-        onStopListening={app.stopListening}
+        turns={app.turns}
+        interim={interim}
+        onStartListening={handleStartListening}
+        onStopListening={handleStopListening}
+        onFinalTranscript={handleFinalTranscript}
+        onInterimTranscript={handleInterimTranscript}
         onError={handleError}
       />
 
-      {/* Answer panel */}
+      {/* Metadata row (sources, grounded, latency) — shown below panels when answer exists */}
+      <AnimatePresence>
+        {showAnswer && hasConversation && (
+          <AnswerView
+            answer=""
+            sourceCount={app.sources.length}
+            grounded={app.grounded}
+            metrics={app.metrics}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Latency panel */}
       <AnimatePresence>
         {showAnswer && (
-          <>
-            <AnswerView
-              answer={app.answer}
-              sourceCount={app.sources.length}
-              grounded={app.grounded}
-              metrics={app.metrics}
-            />
-            <SourceContext sources={app.sources} />
-            <LatencyPanel metrics={app.metrics} percentiles={app.percentiles} />
-          </>
+          <LatencyPanel metrics={app.metrics} percentiles={app.percentiles} />
         )}
       </AnimatePresence>
 

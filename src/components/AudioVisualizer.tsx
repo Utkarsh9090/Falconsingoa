@@ -54,14 +54,14 @@ export function AudioVisualizer({ frequencyData, amplitude, isActive }: AudioVis
           return (
             <line
               key={i}
-              x1={x1}
-              y1={y1}
-              x2={x2}
-              y2={y2}
+              x1={x1.toFixed(3)}
+              y1={y1.toFixed(3)}
+              x2={x2.toFixed(3)}
+              y2={y2.toFixed(3)}
               stroke="#FFD400"
               strokeWidth={2}
               strokeLinecap="round"
-              opacity={0.4 + (bar.height / MAX_BAR_HEIGHT) * 0.6}
+              opacity={(0.4 + (bar.height / MAX_BAR_HEIGHT) * 0.6).toFixed(3)}
             />
           );
         })}

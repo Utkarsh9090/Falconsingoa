@@ -9,7 +9,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 
-const SARVAM_STT = 'https://api.sarvam.ai/v1/speech-to-text';
+const SARVAM_STT = 'https://api.sarvam.ai/speech-to-text';
 
 export async function POST(req: NextRequest) {
   const apiKey = process.env.SARVAM;
@@ -33,9 +33,12 @@ export async function POST(req: NextRequest) {
 
   try {
     // Forward to Sarvam STT
+    const audioBuffer = await audioFile.arrayBuffer();
+    const audioBlob = new Blob([audioBuffer], { type: 'audio/wav' });
+    
     const sarvamForm = new FormData();
-    sarvamForm.append('file', audioFile, 'audio.webm');
-    sarvamForm.append('model', 'saaras:v2');
+    sarvamForm.append('file', audioBlob, 'audio.wav');
+    sarvamForm.append('model', 'saaras:v3');
 
     const res = await fetch(SARVAM_STT, {
       method: 'POST',

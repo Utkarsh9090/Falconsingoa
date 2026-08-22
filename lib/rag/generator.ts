@@ -85,7 +85,7 @@ async function callSarvam(
         'api-subscription-key': apiKey,
       },
       body: JSON.stringify({
-        model: 'sarvam-m',
+        model: 'sarvam-105b-conversations',
         messages,
         temperature: 0.1,
         max_tokens: 400,

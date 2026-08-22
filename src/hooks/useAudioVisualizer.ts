@@ -17,7 +17,7 @@ export interface AudioVisualizerHook {
   /** Start capturing from mic */
   startCapture: () => Promise<MediaStream | null>;
   /** Stop capturing */
-  stopCapture: () => Blob | null;
+  stopCapture: () => Promise<Blob | null>;
   /** Error message if mic access failed */
   micError: string | null;
 }
@@ -92,26 +92,38 @@ export function useAudioVisualizer(): AudioVisualizerHook {
     }
   }, [tick]);
 
-  const stopCapture = useCallback((): Blob | null => {
-    // Stop animation
-    if (rafRef.current) {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-    }
+  const stopCapture = useCallback((): Promise<Blob | null> => {
+    return new Promise((resolve) => {
+      // Stop animation
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
 
-    // Stop recorder and collect blob
-    let audioBlob: Blob | null = null;
-    const recorder = mediaRecorderRef.current;
-    if (recorder && recorder.state !== 'inactive') {
+      const recorder = mediaRecorderRef.current;
+      if (!recorder || recorder.state === 'inactive') {
+        cleanupAudio();
+        resolve(null);
+        return;
+      }
+
+      recorder.onstop = () => {
+        let audioBlob: Blob | null = null;
+        if (chunksRef.current.length > 0) {
+          audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        } else {
+          // Even if empty, return a placeholder blob so the pipeline continues
+          audioBlob = new Blob([], { type: 'audio/webm' });
+        }
+        cleanupAudio();
+        resolve(audioBlob);
+      };
+
       recorder.stop();
-    }
-    if (chunksRef.current.length > 0) {
-      audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
-    } else {
-      // Even if empty, return a placeholder blob so the pipeline continues
-      audioBlob = new Blob([], { type: 'audio/webm' });
-    }
+    });
+  }, []);
 
+  const cleanupAudio = () => {
     // Stop stream tracks
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((t) => t.stop());
@@ -130,9 +142,7 @@ export function useAudioVisualizer(): AudioVisualizerHook {
     setIsCapturing(false);
     setAmplitude(0);
     setFrequencyData(new Uint8Array(64));
-
-    return audioBlob;
-  }, []);
+  };
 
   // Cleanup on unmount
   useEffect(() => {

@@ -12,6 +12,9 @@ import type {
 } from '../types/index';
 
 export interface APIService {
+  /** Synthesize text to speech */
+  synthesizeSpeech(text: string): Promise<string>;
+
   /** Transcribe audio blob to text via STT */
   transcribeAudio(audioBlob: Blob): Promise<string>;
 

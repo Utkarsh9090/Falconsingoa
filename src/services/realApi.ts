@@ -10,6 +10,19 @@ import type { RAGResponse, SystemStatusData, PipelineMetrics } from '../types';
 let lastSttMs: number | undefined = undefined;
 
 export const realAPI: APIService = {
+  async synthesizeSpeech(text: string): Promise<string> {
+    const res = await fetch('/api/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
+    });
+    if (!res.ok) {
+      throw new Error(`TTS failed with status ${res.status}`);
+    }
+    const data = await res.json();
+    return data.audioBase64;
+  },
+
   async transcribeAudio(audioBlob: Blob): Promise<string> {
     const formData = new FormData();
     formData.append('audio', audioBlob);

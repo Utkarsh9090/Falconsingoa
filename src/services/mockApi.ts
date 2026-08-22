@@ -187,6 +187,12 @@ function checkGuardrails(query: string): { guardrail: GuardrailResult; answer: s
 }
 
 export const mockAPI: APIService = {
+  async synthesizeSpeech(_text: string): Promise<string> {
+    // Mock: no actual audio — return empty base64 string
+    await sleep(jitter(200, 0.2));
+    return '';
+  },
+
   async transcribeAudio(_audioBlob: Blob): Promise<string> {
     // Simulate STT latency
     await sleep(jitter(800, 0.3));
