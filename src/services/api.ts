@@ -13,7 +13,7 @@ import type {
 
 export interface APIService {
   /** Synthesize text to speech */
-  synthesizeSpeech(text: string): Promise<string>;
+  synthesizeSpeech(text: string, languageCode?: string): Promise<string>;
 
   /** Transcribe audio blob to text via STT */
   transcribeAudio(audioBlob: Blob): Promise<string>;

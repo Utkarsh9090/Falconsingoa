@@ -7,7 +7,7 @@
  *   3. Post-LLM: unsafe content detection in generated answer
  */
 
-export type GuardrailResult = 'pass' | 'off_topic' | 'no_context' | 'blocked';
+export type GuardrailResult = 'pass' | 'off_topic' | 'no_context' | 'blocked' | 'casual';
 
 export interface GuardrailCheck {
   result: GuardrailResult;
@@ -34,6 +34,15 @@ const OFF_TOPIC_PATTERNS = [
   /\b(movie|film|actor|actress|celebrity|gossip)\b/i,
   /\b(horoscope|zodiac|astrology)\b/i,
   /\b(stock\s+price|crypto|bitcoin|ethereum)\b/i,
+];
+
+const CASUAL_PATTERNS = [
+  /^(hi|hello|hey|greetings|good\s+(morning|afternoon|evening|night))(?!.+)/i,
+  /^how\s+are\s+you/i,
+  /^what'?s\s+up/i,
+  /^who\s+are\s+you/i,
+  /^thanks/i,
+  /^thank\s+you/i,
 ];
 
 /* ── 2. TOPIC KEYWORDS (for domain relevance) ─────────────── */
@@ -68,6 +77,13 @@ export function preGuardrail(query: string): GuardrailCheck {
     }
   }
 
+  // Casual greeting / Intent routing
+  for (const pattern of CASUAL_PATTERNS) {
+    if (pattern.test(trimmed)) {
+      return { result: 'casual', reason: 'Casual greeting detected' };
+    }
+  }
+
   // Clearly off-topic
   for (const pattern of OFF_TOPIC_PATTERNS) {
     if (pattern.test(trimmed)) {
@@ -81,7 +97,10 @@ export function preGuardrail(query: string): GuardrailCheck {
 
   // Check if query has any domain relevance
   const q = trimmed.toLowerCase();
-  const hasRelevantTerm = DOMAIN_KEYWORDS.some((kw) => q.includes(kw));
+  const hasRelevantTerm = DOMAIN_KEYWORDS.some((kw) => {
+    const regex = new RegExp(`\\b${kw}\\b`, 'i');
+    return regex.test(q);
+  });
 
   if (!hasRelevantTerm && trimmed.split(/\s+/).length > 6) {
     return {

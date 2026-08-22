@@ -10,11 +10,11 @@ import type { RAGResponse, SystemStatusData, PipelineMetrics } from '../types';
 let lastSttMs: number | undefined = undefined;
 
 export const realAPI: APIService = {
-  async synthesizeSpeech(text: string): Promise<string> {
+  async synthesizeSpeech(text: string, languageCode?: string): Promise<string> {
     const res = await fetch('/api/tts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text }),
+      body: JSON.stringify({ text, languageCode }),
     });
     if (!res.ok) {
       throw new Error(`TTS failed with status ${res.status}`);

@@ -8,14 +8,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'SARVAM API key not configured' }, { status: 500 });
   }
 
-  let body: { text?: string; speaker?: string };
+  let body: { text?: string; speaker?: string; languageCode?: string };
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  const { text, speaker = 'shubh' } = body;
+  const { text, speaker = 'shubh', languageCode = 'en-IN' } = body;
   if (!text || typeof text !== 'string') {
     return NextResponse.json({ error: 'Missing or invalid text' }, { status: 400 });
   }
@@ -30,8 +30,8 @@ export async function POST(req: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        text: safeText, // curl example expects this
-        language_code: 'en-IN',
+        text: safeText,
+        language_code: languageCode,
         speaker: speaker,
         model: 'bulbul:v3'
       }),

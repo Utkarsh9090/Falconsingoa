@@ -139,38 +139,16 @@ export function useAppState(): AppStateHook {
 
         // TTS — fire-and-forget, non-blocking
         if (!abortRef.current && response.answer) {
-          api.synthesizeSpeech(response.answer)
+          const langCode = response.languageCode || 'en-IN';
+          
+          // Force Sarvam Cloud TTS to ensure 'shubh' voice is used
+          api.synthesizeSpeech(response.answer, langCode)
             .then((base64) => {
               if (abortRef.current) return;
               const audio = new Audio('data:audio/wav;base64,' + base64);
-              audio.play().catch((err) => {
-                console.warn('[TTS] Primary audio play failed, falling back to speechSynthesis:', err);
-                if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-                  const utt = new SpeechSynthesisUtterance(response.answer.substring(0, 300));
-                  // Prefer Indian English voices
-                  const voices = window.speechSynthesis.getVoices();
-                  const preferred = voices.find(
-                    (v) => v.lang.startsWith('en-IN') || v.name.toLowerCase().includes('india')
-                  );
-                  if (preferred) utt.voice = preferred;
-                  utt.rate = 0.95;
-                  window.speechSynthesis.speak(utt);
-                }
-              });
+              audio.play().catch(console.warn);
             })
-            .catch((err) => {
-              console.warn('[TTS] API fetch failed, falling back to speechSynthesis:', err);
-              if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-                const utt = new SpeechSynthesisUtterance(response.answer.substring(0, 300));
-                const voices = window.speechSynthesis.getVoices();
-                const preferred = voices.find(
-                  (v) => v.lang.startsWith('en-IN') || v.name.toLowerCase().includes('india')
-                );
-                if (preferred) utt.voice = preferred;
-                utt.rate = 0.95;
-                window.speechSynthesis.speak(utt);
-              }
-            });
+            .catch(console.warn);
         }
         break;
       }
@@ -218,12 +196,7 @@ export function useAppState(): AppStateHook {
         if (abortRef.current) return;
 
         setState(AppState.GENERATING);
-        await new Promise((r) => setTimeout(r, 200));
-        if (abortRef.current) return;
-
         setState(AppState.VERIFYING);
-        await new Promise((r) => setTimeout(r, 300));
-        if (abortRef.current) return;
 
         processResponse(response, query, turnId);
       } catch {

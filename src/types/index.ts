@@ -85,6 +85,7 @@ export interface RAGResponse {
   guardrail: GuardrailResult;
   metrics: PipelineMetrics;
   percentiles: PercentileMetrics;
+  languageCode?: string;
 }
 
 /* ===================================================================

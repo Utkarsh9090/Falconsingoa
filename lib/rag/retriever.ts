@@ -205,8 +205,12 @@ export async function retrieve(
   // 4. RRF fusion
   const fused = reciprocalRankFusion(denseResults, sparseResults);
 
-  // 5. LLM reranking
-  const reranked = await llmRerank(query, fused, apiKey, topKRerank);
+  // 5. Skip LLM reranking (latency optimization)
+  const reranked: RetrievalResult[] = fused.slice(0, topKRerank).map((c, i) => ({
+    chunk: c.chunk,
+    rrfScore: c.rrfScore,
+    rank: i + 1,
+  }));
 
   // 6. Resolve hierarchical parents for richer context
   if (resolveHierarchical) {

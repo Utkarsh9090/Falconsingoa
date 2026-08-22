@@ -76,7 +76,8 @@ export function VoiceInterface({
         // Native path: no mic capture needed, browser handles audio
         nativeSTT.start(
           (finalText) => {
-            // isFinal → trigger the RAG pipeline
+            // isFinal → stop listening to prevent echo, then trigger the RAG pipeline
+            nativeSTT.stop();
             onFinalTranscript(finalText);
           },
           (interimText) => {

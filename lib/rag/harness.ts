@@ -27,7 +27,7 @@ import { CORPUS } from './corpus';
 import { chunkCorpus, getRetrievalChunks, type Chunk } from './chunker';
 import { buildVectorStore, type VectorStore } from './vectorstore';
 import { buildBM25Index, type BM25Index } from './bm25';
-import { retrieve } from './retriever';
+import { retrieve, type RetrievalResult } from './retriever';
 import { generate } from './generator';
 import {
   preGuardrail,
@@ -68,6 +68,7 @@ export interface RAGResponse {
   guardrail: GuardrailResult;
   metrics: PipelineMetrics;
   percentiles: PercentileMetrics;
+  languageCode?: string;
 }
 
 /* ── Singleton state ──────────────────────────────────────── */
@@ -139,32 +140,52 @@ export async function runPipeline(
 
   /* 1. Pre-guardrail */
   const preCheck = preGuardrail(query);
-  if (preCheck.result !== 'pass') {
+  if (preCheck.result === 'blocked') {
     metrics.total = 2;
     return emptyResponse(preCheck.result);
   }
 
-  /* 2-5. Retrieval */
-  const t_retrieval = Date.now();
-  const results = await retrieve(
-    query,
-    state!.vectorStore,
-    state!.bm25Index,
-    state!.allChunks,
-    apiKey
-  );
-  const retrievalTotalMs = Date.now() - t_retrieval;
+  // Fast-path for casual greetings (bypass retrieval but still generate to match language)
+  if (preCheck.result === 'casual') {
+    metrics.retrieval = 0;
+    metrics.reranking = 0;
+  }
 
-  // Split retrieval/reranking: ~70% retrieval, ~30% reranking
-  metrics.retrieval = Math.round(retrievalTotalMs * 0.7);
-  metrics.reranking = Math.round(retrievalTotalMs * 0.3);
+  let results: RetrievalResult[] = [];
+  let retrievalTotalMs = 0;
+  let contextTexts: string[] = [];
+
+  // Only perform retrieval if it's a domain-relevant query
+  if (preCheck.result === 'pass') {
+    /* 2-5. Retrieval */
+    const wordCount = query.trim().split(/\s+/).length;
+    const topKRerank = wordCount <= 5 ? 4 : wordCount <= 10 ? 5 : 6;
+
+    const t_retrieval = Date.now();
+    results = await retrieve(
+      query,
+      state!.vectorStore,
+      state!.bm25Index,
+      state!.allChunks,
+      apiKey,
+      { topKRerank }
+    );
+    retrievalTotalMs = Date.now() - t_retrieval;
+
+    // Split retrieval/reranking: ~70% retrieval, ~30% reranking
+    metrics.retrieval = Math.round(retrievalTotalMs * 0.7);
+    metrics.reranking = Math.round(retrievalTotalMs * 0.3);
+  } else {
+    metrics.retrieval = 0;
+    metrics.reranking = 0;
+  }
 
   /* 6. Context sufficiency */
-  const contextTexts = results.map((r) => (r.parentChunk ?? r.chunk).text);
+  contextTexts = results.map((r) => (r.parentChunk ?? r.chunk).text);
   const contextCheck = checkContextSufficiency(query, contextTexts);
   if (contextCheck.result !== 'pass') {
-    metrics.total = retrievalTotalMs + 2;
-    return emptyResponse(contextCheck.result);
+    // We log the failure but continue anyway to allow the LLM to answer using general knowledge
+    console.log(`[RAG] Context sufficiency failed: ${contextCheck.reason}`);
   }
 
   /* 7. Generation */
@@ -215,6 +236,7 @@ export async function runPipeline(
     guardrail: 'pass',
     metrics,
     percentiles: getPercentiles(),
+    languageCode: genOutput.languageCode,
   };
 }
 
